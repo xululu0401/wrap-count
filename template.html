@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>称完馅再和面 · 包包子饺子前算一下：面能出几张皮、馅够包几个、哪样先用完</title>
+<meta name="description" content="包包子、饺子、馄饨，面和馅总是一边剩一边不够？填面粉、含水率、肉菜调料和每张皮、每个馅多重，算面能出几张皮、馅够包几个、谁先用完、剩多少，补多少面或馅、皮擀多重能刚好一起用完。按重量的粗算。">
+<style>
+  :root{--bg:#f3efe8;--paper:#fffdf9;--ink:#2a2420;--ink2:#5a4f47;--mut:#8f847b;--line:#e2d9cd;--rule:#efe8de;--dough:#e9cf9f;--dough2:#f7ecd6;--fill:#b5583a;--fill2:#f1d5c9;--hi:#2f6b4f;--hi2:#dcefe4;--bad:#a8372b}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:22px 14px 72px}
+  h1{font-size:30px;line-height:1.25;margin:0 0 6px;letter-spacing:.04em}
+  .sub{color:var(--ink2);margin:0;font-size:15.5px}
+  .muted{color:var(--mut);font-size:13.5px}
+  .hide{display:none !important}
+  button,input{font:inherit}
+  button{cursor:pointer}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px}
+  .chip{background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13.5px;color:var(--ink2)}
+  .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0;margin-top:14px}
+  .card h2{font-size:16px;margin:0 0 8px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .card h2 .no{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--ink);color:#fff;font-size:13px}
+  .big{font-size:21px;line-height:1.5;font-weight:700;margin:0 0 8px;overflow-wrap:anywhere}
+  .why{color:var(--ink2);font-size:14.5px;margin:0;overflow-wrap:anywhere}
+  .err{background:#fff4f2;border:1px solid #f0c9c2;color:var(--bad);border-radius:8px;padding:10px 14px}
+  .err ul{margin:4px 0 0;padding-left:20px}
+  .steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .steps .card{margin-top:0}
+  .out{margin:10px 0 0;padding:10px 12px;border-radius:8px;background:var(--dough2);font-size:14.5px;overflow-wrap:anywhere}
+  .out b{font-size:20px}
+  .s2 .out{background:var(--fill2)} .s3 .out{background:var(--hi2)}
+  .f{display:grid;grid-template-columns:minmax(0,1fr) 96px;gap:8px;align-items:center;margin:6px 0}
+  .f label{font-size:14px;color:var(--ink2)}
+  .f label small{display:block;color:var(--mut);font-size:11.5px;line-height:1.3}
+  input{width:100%;min-width:0;border:1px solid var(--line);background:#fff;border-radius:6px;padding:4px 8px;font-size:16px;text-align:right}
+  input:focus{outline:2px solid var(--hi2);border-color:var(--hi)}
+  .bad{border-color:var(--bad)!important;background:#fff4f2!important}
+  .pair{margin-top:12px}
+  .lane{display:flex;align-items:center;gap:8px;margin:4px 0}
+  .lane .lb{flex:0 0 44px;font-size:13px;color:var(--ink2);text-align:right}
+  .cells{flex:1 1 auto;min-width:0;display:flex;gap:2px;height:22px}
+  .cells i{flex:1 1 0;min-width:0;border-radius:3px}
+  .cells.ld i{background:var(--dough)} .cells.lf i{background:var(--fill)}
+  .cells i.x{background:transparent;border:1px dashed var(--line)}
+  .cells i.part{opacity:.4}
+  .lane .ct{flex:0 0 72px;font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .pairNote{font-size:12.5px;color:var(--mut);margin:2px 0 0 52px}
+  .acts{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+  .act{text-align:left;background:#f1f7f3;border:1px solid var(--hi2);color:var(--ink);border-radius:8px;padding:7px 10px;font-size:14.5px;overflow-wrap:anywhere}
+  .act:hover{background:#e3f1e8}
+  .tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .tools button{background:#fff;border:1px solid var(--line);border-radius:6px;padding:6px 12px;font-size:14px}
+  details{margin-top:16px}
+  details summary{cursor:pointer;font-weight:600}
+  details li{font-size:14px;color:var(--ink2);margin:4px 0}
+  @media (max-width:860px){
+    .steps{grid-template-columns:minmax(0,1fr)}
+    h1{font-size:24px}
+    .big{font-size:18.5px}
+    .card{padding:12px}
+    .lane .lb{flex-basis:36px} .lane .ct{flex-basis:70px} .pairNote{margin-left:44px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>称完馅再和面</h1>
+  <p class="sub">包包子、饺子、馄饨，面和馅总是一边剩一边不够？先把馅称一下，再定和多少面：算面能出几张皮、馅够包几个、谁先用完，补多少、皮擀多重能刚好一起用完。</p>
+  <div class="chips" id="presets"></div>
+  <p class="muted" id="presetNote"></p>
+
+  <div class="card">
+    <div id="errBox" class="err hide"></div>
+    <div id="okBox">
+      <p class="big" id="headline"></p>
+      <p class="why" id="why"></p>
+      <div class="pair" id="pair" aria-label="皮和馅按个数对齐：一格一张皮、一格一份馅"></div>
+      <h2 style="margin-top:14px">改一样试试（点了直接改条件）</h2>
+      <div class="acts" id="acts"></div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="card s1">
+      <h2><span class="no">1</span>和面</h2>
+      <div class="f"><label for="flour">面粉<small>克</small></label><input id="flour" inputmode="numeric"></div>
+      <div class="f"><label for="hyd">含水率<small>% ，水 ÷ 面粉</small></label><input id="hyd" inputmode="decimal"></div>
+      <div class="f"><label for="other">其他配料<small>% ，酵母糖油盐合计，占面粉</small></label><input id="other" inputmode="decimal"></div>
+      <div class="f"><label for="dLoss">损耗<small>% ，粘盆粘手、扑面</small></label><input id="dLoss" inputmode="decimal"></div>
+      <div class="out" id="o1"></div>
+    </div>
+    <div class="card s2">
+      <h2><span class="no">2</span>拌馅</h2>
+      <div class="f"><label for="meat">肉<small>克</small></label><input id="meat" inputmode="numeric"></div>
+      <div class="f"><label for="mwater">打水<small>克，打进肉里的水 / 葱姜水</small></label><input id="mwater" inputmode="numeric"></div>
+      <div class="f"><label for="veg">菜<small>克，切之前称</small></label><input id="veg" inputmode="numeric"></div>
+      <div class="f"><label for="keep">菜挤水后剩<small>% ，不挤填 100</small></label><input id="keep" inputmode="decimal"></div>
+      <div class="f"><label for="season">调料<small>克，油、酱油、盐等</small></label><input id="season" inputmode="numeric"></div>
+      <div class="f"><label for="fLoss">损耗<small>% ，粘盆、勺子</small></label><input id="fLoss" inputmode="decimal"></div>
+      <div class="out" id="o2"></div>
+    </div>
+    <div class="card s3">
+      <h2><span class="no">3</span>包</h2>
+      <div class="f"><label for="name">包的什么</label><input id="name" maxlength="12" style="text-align:left"></div>
+      <div class="f"><label for="skin">每张皮<small>克，揪一个剂子称</small></label><input id="skin" inputmode="numeric"></div>
+      <div class="f"><label for="fill">每个馅<small>克，舀一勺称</small></label><input id="fill" inputmode="numeric"></div>
+      <div class="f"><label for="want">想包几个<small>可以不填</small></label><input id="want" inputmode="numeric"></div>
+      <div class="out" id="o3"></div>
+      <p class="muted" style="margin:8px 0 0">改完自动重算 <span id="saveTag"></span></p>
+    </div>
+  </div>
+
+  <div class="tools">
+    <button type="button" id="dlPng">结果卡 PNG</button>
+    <button type="button" id="dlCsv">用料与改法 CSV</button>
+    <button type="button" id="dlMd">文字版 MD</button>
+    <button type="button" id="dlJson">备份 JSON</button>
+    <button type="button" id="impJson">导入备份</button>
+    <input type="file" id="impFile" accept=".json,application/json" class="hide">
+    <button type="button" id="reset">回到默认</button>
+  </div>
+  <p class="muted" id="impMsg"></p>
+
+  <details>
+    <summary>怎么算的、哪些不算</summary>
+    <ul>
+      <li>面团 = 面粉 ×（1 + 含水率 + 其他配料）×（1 − 损耗）。发面只是体积变大，重量基本不变，所以不另算发酵。</li>
+      <li>馅 =（肉 + 打水 + 菜 × 挤水后剩 + 调料）×（1 − 损耗）。打进去的水假设全部吃进馅里；菜出多少水因菜和手法差很多，只按你填的「挤水后剩」估。</li>
+      <li>皮能出几张 = 面团 ÷ 每张皮，馅够包几个 = 馅 ÷ 每个馅，都往下取整；能包的个数取两者里小的那个。克数全按整数精确算，页面四舍五入到 1 克。</li>
+      <li>改法都是真的改了条件再算一遍，结果对得上才显示：补面粉找的是最少要多少克；补馅按现在的比例把每样一起放大（每样向上取整到克）。</li>
+      <li>含水率、皮和馅的重量没有标准答案，各家习惯不同；默认数字是虚构示例。馅比皮重一倍以上时页面会提醒一句，捏不捏得住口要你自己试。</li>
+    </ul>
+  </details>
+</div>
+<script src="./core.js"></script>
+<script src="./ui.js"></script>
+</body>
+</html>
